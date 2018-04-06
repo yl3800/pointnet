@@ -24,13 +24,13 @@ parser.add_argument('--batchSize', type=int, default=32, help='input batch size'
 parser.add_argument('--workers', type=int, help='number of data loading workers', default=4)
 parser.add_argument('--nepoch', type=int, default=25, help='number of epochs to train for')
 parser.add_argument('--outf', type=str, default='seg',  help='output folder')
-parser.add_argument('--model', type=str, default = '',  help='model path')
+parser.add_argument('--model', type=str, default = '',  help='model path') #之前训练的模型
 
 
 opt = parser.parse_args()
 print (opt)
 
-opt.manualSeed = random.randint(1, 10000) # fix seed
+opt.manualSeed = random.randint(1, 10000) # 在训练开始时，参数的初始化是随机的，为了让每次的结果一致，我们需要设置随机种子(seed不变，random就没用)
 print("Random Seed: ", opt.manualSeed)
 random.seed(opt.manualSeed)
 torch.manual_seed(opt.manualSeed)
@@ -47,22 +47,23 @@ print(len(dataset), len(test_dataset))
 num_classes = dataset.num_seg_classes
 print('classes', num_classes)
 try:
-    os.makedirs(opt.outf)
+    os.makedirs(opt.outf) #创建 output的路径
 except OSError:
     pass
 
 blue = lambda x:'\033[94m' + x + '\033[0m'
 
 
-classifier = PointNetDenseCls(k = num_classes)
+classifier = PointNetDenseCls(k = num_classes) #模型实例化
 
 if opt.model != '':
-    classifier.load_state_dict(torch.load(opt.model))
+    classifier.load_state_dict(torch.load(opt.model)) #载入预训练模型的参数the_model = TheModelClass(*args, **kwargs)
+                                                      #                 the_model.load_state_dict(torch.load(PATH))，opt.model是个path
 
 optimizer = optim.SGD(classifier.parameters(), lr=0.01, momentum=0.9)
 classifier.cuda()
 
-num_batch = len(dataset)/opt.batchSize
+num_batch = len(dataset)/opt.batchSize #把data分成多个batch
 
 for epoch in range(opt.nepoch):
     for i, data in enumerate(dataloader, 0):
@@ -97,4 +98,4 @@ for epoch in range(opt.nepoch):
             correct = pred_choice.eq(target.data).cpu().sum()
             print('[%d: %d/%d] %s loss: %f accuracy: %f' %(epoch, i, num_batch, blue('test'), loss.data[0], correct/float(opt.batchSize * 2500)))
     
-    torch.save(classifier.state_dict(), '%s/seg_model_%d.pth' % (opt.outf, epoch))
+    torch.save(classifier.state_dict(), '%s/seg_model_%d.pth' % (opt.outf, epoch)) #保存模型torch.save(the_model, PATH)
