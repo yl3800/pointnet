@@ -15,7 +15,7 @@ import argparse
 import json #JavaScript
 
 
-class PartDataset(data.Dataset):
+class PartDataset(data.Dataset):  #继承data.Dataset类
     def __init__(self, root, npoints = 2500, classification = False, class_choice = None, train = True):
         self.npoints = npoints
         self.root = root
