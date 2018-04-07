@@ -54,7 +54,7 @@ except OSError:
 blue = lambda x:'\033[94m' + x + '\033[0m'
 
 
-classifier = PointNetDenseCls(k = num_classes) #模型实例化
+classifier = PointNetDenseCls(k = num_classes) #模型实例化， 每个点都label一个class
 
 if opt.model != '':
     classifier.load_state_dict(torch.load(opt.model)) #载入预训练模型的参数the_model = TheModelClass(*args, **kwargs)
@@ -66,14 +66,14 @@ classifier.cuda()
 num_batch = len(dataset)/opt.batchSize #把data分成多个batch
 
 for epoch in range(opt.nepoch):
-    for i, data in enumerate(dataloader, 0):
+    for i, data in enumerate(dataloader, 0):  #enumerate(dataloader,start= 0) 中0可省略
         points, target = data
         points, target = Variable(points), Variable(target)
-        points = points.transpose(2,1) 
+        points = points.transpose(2,1)           #??? shape=nx3x1?nx1x3
         points, target = points.cuda(), target.cuda()   
-        optimizer.zero_grad()
-        pred, _ = classifier(points)
-        pred = pred.view(-1, num_classes)
+        optimizer.zero_grad()               # 初始化grad=0
+        pred, _ = classifier(points)        #
+        pred = pred.view(-1, num_classes)   #shape=num_classesx1?
         target = target.view(-1,1)[:,0] - 1
         #print(pred.size(), target.size())
         loss = F.nll_loss(pred, target)
@@ -98,4 +98,4 @@ for epoch in range(opt.nepoch):
             correct = pred_choice.eq(target.data).cpu().sum()
             print('[%d: %d/%d] %s loss: %f accuracy: %f' %(epoch, i, num_batch, blue('test'), loss.data[0], correct/float(opt.batchSize * 2500)))
     
-    torch.save(classifier.state_dict(), '%s/seg_model_%d.pth' % (opt.outf, epoch)) #保存模型torch.save(the_model, PATH)
+    torch.save(classifier.state_dict(), '%s/seg_model_%d.pth' % (opt.outf, epoch)) #每个epoch保存一次模型torch.save(the_model, PATH)
