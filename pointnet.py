@@ -17,12 +17,12 @@ import matplotlib.pyplot as plt
 import pdb
 import torch.nn.functional as F
 
-
+#每个class的__init__都没有数据流经过，只是定义一些forward需要用的层
 class STN3d(nn.Module):
     def __init__(self, num_points = 2500):
-        super(STN3d, self).__init__()
+        super(STN3d, self).__init__()   #super(A,self).__init__() 用于初始化A的父类，即nn.Module,这句话相当于nn.Module.__init__(self)
         self.num_points = num_points
-        self.conv1 = torch.nn.Conv1d(3, 64, 1)
+        self.conv1 = torch.nn.Conv1d(3, 64, 1)#输入[32x3x2500x1] bxcxhxw，2500x1是一维，conv1d
         self.conv2 = torch.nn.Conv1d(64, 128, 1)
         self.conv3 = torch.nn.Conv1d(128, 1024, 1)
         self.mp1 = torch.nn.MaxPool1d(num_points)
@@ -138,20 +138,20 @@ if __name__ == '__main__':
     sim_data = Variable(torch.rand(32,3,2500))
     trans = STN3d()
     out = trans(sim_data)
-    print('stn', out.size())
+    print('stn', out.size())#32,3,3
 
     pointfeat = PointNetfeat(global_feat=True)
     out, _ = pointfeat(sim_data)
-    print('global feat', out.size())
+    print('global feat', out.size())#32,1024
 
     pointfeat = PointNetfeat(global_feat=False)
     out, _ = pointfeat(sim_data)
-    print('point feat', out.size())
+    print('point feat', out.size())#32,1088,2500
 
     cls = PointNetCls(k = 5)
     out, _ = cls(sim_data)
-    print('class', out.size())
+    print('class', out.size())#32,5
 
     seg = PointNetDenseCls(k = 3)
     out, _ = seg(sim_data)
-    print('seg', out.size())
+    print('seg', out.size())#32,2500,3
