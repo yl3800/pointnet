@@ -14,7 +14,7 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 from torch.autograd import Variable
 from datasets import PartDataset
-from pointnet import PointNetDenseCls
+from pointnet import PointNetDenseCls #只从模型中import接口函数就可以了
 import torch.nn.functional as F
 
 
