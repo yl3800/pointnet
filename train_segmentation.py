@@ -79,7 +79,7 @@ for epoch in range(opt.nepoch):
         loss = F.nll_loss(pred, target)
         loss.backward()
         optimizer.step()
-        pred_choice = pred.data.max(1)[1]
+        pred_choice = pred.data.max(1)[1] #极大似然
         correct = pred_choice.eq(target.data).cpu().sum()
         print('[%d: %d/%d] train loss: %f accuracy: %f' %(epoch, i, num_batch, loss.data[0], correct/float(opt.batchSize * 2500)))
         
