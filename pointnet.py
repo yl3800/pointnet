@@ -123,11 +123,11 @@ class PointNetDenseCls(nn.Module):
 
     def forward(self, x):
         batchsize = x.size()[0]
-        x, trans = self.feat(x)
-        x = F.relu(self.bn1(self.conv1(x)))
-        x = F.relu(self.bn2(self.conv2(x)))
-        x = F.relu(self.bn3(self.conv3(x)))
-        x = self.conv4(x)
+        x, trans = self.feat(x)#32,1088,3,1
+        x = F.relu(self.bn1(self.conv1(x)))#32,512,3,1
+        x = F.relu(self.bn2(self.conv2(x)))##32,256,3,1
+        x = F.relu(self.bn3(self.conv3(x)))#32,128,3,1
+        x = self.conv4(x)#32,self.k,3,1
         x = x.transpose(2,1).contiguous()
         x = F.log_softmax(x.view(-1,self.k))
         x = x.view(batchsize, self.num_points, self.k)
